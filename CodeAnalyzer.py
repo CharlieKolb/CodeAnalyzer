@@ -4,8 +4,10 @@ from collections import deque, namedtuple
 '''
 ToDo Options:
 -add_extension .ext line_comment block_comment b_nested_block   additional file types to inspect
--path C:/some/absolute/path                                     analysis of a path different from CodeAnalyzer.py
+-path <C:/some/absolute/path>                                   analysis of a path different from CodeAnalyzer.py
 -print_path_absolute                                            reference files by their absolute path instead of their relative one
+-exclude_dir <regex>                                            directories to be ignored
+-exclude_file <regex>                                           files to be ignored
 -help                                                           help
 '''
 

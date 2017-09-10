@@ -1,0 +1,33 @@
+language, line_comment, block_comment_start, block_comment_end
+java,//,/*,*/
+scala,//,/*,*/
+kotlin,//,/*,*/
+c,//,/*,*/
+c++,//,/*,*/
+c#,//,/*,*/
+d,//,/*,*/
+dart,//,/*,*/
+javascript,//,/*,*/
+rust,//,/*,*/
+php,// #,/*,*/
+swift,//,/*,*/
+objective-c,//,/*,*/
+go,//,/*,*/
+hlsl,//,/*,*/
+python,#,''','''
+perl,#,=begin,=cut
+ruby,#,=begin,=cut
+julia,#,#=,=#
+r,#,,
+matlab,%,%{,}%
+lua,--,--[[,]]
+haskell,--,{-,-}
+ocaml,,(*,*)
+f#,//,(*,*)
+sql,--,/*,*/
+visual_basic,',,
+object_pascal,//,{ (*, } *)
+x86assembly,;,,
+common_lisp,;,#|,|#
+clojure,;,(comment,)
+
