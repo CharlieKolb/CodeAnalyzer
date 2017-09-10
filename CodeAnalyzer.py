@@ -1,7 +1,24 @@
 import os
 from collections import deque, namedtuple
 
+'''
+ToDo Options:
+-add_extension .ext line_comment block_comment b_nested_block   additional file types to inspect
+-path C:/some/absolute/path                                     analysis of a path different from CodeAnalyzer.py
+-print_path_absolute                                            reference files by their absolute path instead of their relative one
+-help                                                           help
+'''
+
+
+class ExtensionError(Exception):
+    pass
+
 DictData = namedtuple("DictData", "amount_of_files file_name_list dir_path_list")
+FileData = namedtuple("FileData", "extension line_count char_count")
+
+file_extensions = ['.java', '.js', '.c', '.h', '.cpp', '.hpp', '.cs', '.py', '.php']
+
+abs_path_flag = False
 
 
 # ToDo handle different input parameters and call the fitting functions
@@ -26,20 +43,46 @@ def analyze_dir(path):
     return DictData(file_counter, file_names, dir_paths)
 
 
+def analyze_file(path):
+    if not os.path.isfile(path):
+        raise FileNotFoundError("File {0} not found!".format(path))
+    line_count = 0
+    char_count = 0
+    _, extension = os.path.splitext(path)
+    name = path if abs_path_flag else os.path.relpath(path)
+    if extension not in file_extensions:
+        raise ExtensionError(extension)
+    file = open(path, 'r')
+    print(path, extension)
+    for line in file:
+        line_count += 1
+        char_count += len(line)
+    return name, FileData(extension, line_count, char_count)
+
+
 def do_the_thing(start_dir=os.path.dirname(os.path.abspath(__file__))):
     dir_dict = {}
-    start_dir = start_dir
+    file_dict = {}
+    start_dir = os.path.normpath(os.path.normcase(start_dir))
     # ToDo add option for user input path
     # deque with absolute path of the file
     dir_deque = deque()
     dir_deque.append(start_dir)
+    # iterate through all directories and save discovered files in dir_dict
     while dir_deque:
         curr_dir = dir_deque.popleft()
         dir_dict[curr_dir] = analyze_dir(curr_dir)
         for dir_name in dir_dict[curr_dir].dir_path_list:
             dir_deque.append(dir_name)
+    for k,v in dir_dict.items():
+        for file_name in v.file_name_list:
+            try:
+                file_key, file_data = analyze_file(k + os.path.sep + file_name)
+                print(file_data.line_count, file_data.char_count)
+                file_dict[file_key] = file_data
+            except ExtensionError:
+                # maybe remove item from file_name_list?
+                pass
 
-    for k in dir_dict:
-        print(k, dir_dict[k])
 
 do_the_thing()
