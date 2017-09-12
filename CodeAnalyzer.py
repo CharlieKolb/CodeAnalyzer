@@ -8,6 +8,7 @@ ToDo Options:
 -print_path_absolute                                            reference files by their absolute path instead of their relative one
 -exclude_dir <regex>                                            directories to be ignored
 -exclude_file <regex>                                           files to be ignored
+-count_unknown                                                  also count amount and line/char count of files of unknown type (e.g. csv, png)
 -help                                                           help
 '''
 
@@ -15,8 +16,33 @@ ToDo Options:
 class ExtensionError(Exception):
     pass
 
-DictData = namedtuple("DictData", "amount_of_files file_name_list dir_path_list")
-FileData = namedtuple("FileData", "extension line_count char_count")
+DirData = namedtuple("DictData", "amount_of_files file_name_list dir_path_list")
+# FileData = namedtuple("FileData", "extension line_count char_count")
+# LangData = namedtuple("LangData", "file_count line_count char_count")
+
+
+class FileData:
+    def __init__(self, extension, line_count=0, char_count=0):
+        self.extension = extension
+        self.line_count = line_count
+        self.char_count = char_count
+
+
+class LangData:
+    def __init__(self, file_count=0, line_count=0, char_count=0):
+        self.file_count = file_count
+        self.line_count = line_count
+        self.char_count = char_count
+
+    def __add__(self, other):
+        return LangData(file_count=self.file_count + other.file_count,
+                        line_count=self.line_count + other.line_count,
+                        char_count=self.char_count + other.char_count)
+
+    def __repr__(self):
+        # ToDo Dynamically assign maximum required spaces for formatting
+        return "[file_count = {0:6}, line_count = {1:8}, char_count = {2:15}]"\
+            .format(self.file_count, self.line_count, self.char_count)
 
 file_extensions = ['.java', '.js', '.c', '.h', '.cpp', '.hpp', '.cs', '.py', '.php']
 
@@ -42,7 +68,7 @@ def analyze_dir(path):
         else:
             # print("dir: " + path + os.path.sep + entry)
             dir_paths.append(path + os.path.sep + entry)
-    return DictData(file_counter, file_names, dir_paths)
+    return DirData(file_counter, file_names, dir_paths)
 
 
 def analyze_file(path):
@@ -52,13 +78,16 @@ def analyze_file(path):
     char_count = 0
     _, extension = os.path.splitext(path)
     name = path if abs_path_flag else os.path.relpath(path)
-    if extension not in file_extensions:
-        raise ExtensionError(extension)
+    # if extension not in file_extensions:
+    #    raise ExtensionError(extension)
     file = open(path, 'r')
     print(path, extension)
-    for line in file:
-        line_count += 1
-        char_count += len(line)
+    try:
+        for line in file:
+            line_count += 1
+            char_count += len(line)
+    except UnicodeDecodeError:
+        return name, None
     return name, FileData(extension, line_count, char_count)
 
 
@@ -76,15 +105,29 @@ def do_the_thing(start_dir=os.path.dirname(os.path.abspath(__file__))):
         dir_dict[curr_dir] = analyze_dir(curr_dir)
         for dir_name in dir_dict[curr_dir].dir_path_list:
             dir_deque.append(dir_name)
-    for k,v in dir_dict.items():
+    for k, v in dir_dict.items():
         for file_name in v.file_name_list:
             try:
                 file_key, file_data = analyze_file(k + os.path.sep + file_name)
-                print(file_data.line_count, file_data.char_count)
-                file_dict[file_key] = file_data
+                if file_data is not None:
+                    file_dict[file_key] = file_data
             except ExtensionError:
                 # maybe remove item from file_name_list?
                 pass
 
+    for k, v in order_by_lang(file_dict).items():
+        print("{:<8}:  {}".format(k, v))
+
+
+def order_by_lang(file_dict):
+    lang_dict = dict()
+    for k, v in file_dict.items():
+        if v.extension not in lang_dict:
+            lang_dict[v.extension] = LangData(1, v.line_count, v.char_count)
+        else:
+            lang_dict[v.extension].file_count += 1
+            lang_dict[v.extension].line_count += v.line_count
+            lang_dict[v.extension].char_count += v.char_count
+    return lang_dict
 
 do_the_thing()
