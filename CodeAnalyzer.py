@@ -46,12 +46,23 @@ class LangData:
 
 file_extensions = ['.java', '.js', '.c', '.h', '.cpp', '.hpp', '.cs', '.py', '.php']
 
-abs_path_flag = False
+flag_abs_path = False
 
 
 # ToDo handle different input parameters and call the fitting functions
 def main():
     pass
+
+
+def parse_file(file, extension):
+    line_count, char_count = 0, 0
+    try:
+        for line in file:
+            line_count += 1
+            char_count += len(line)
+    except UnicodeDecodeError:
+        pass
+    return FileData(extension, line_count, char_count)
 
 
 def analyze_dir(path):
@@ -74,21 +85,15 @@ def analyze_dir(path):
 def analyze_file(path):
     if not os.path.isfile(path):
         raise FileNotFoundError("File {0} not found!".format(path))
-    line_count = 0
+    line_count, char_count, comment_line_count, whitespace_count = 0, 0, 0, 0
     char_count = 0
     _, extension = os.path.splitext(path)
-    name = path if abs_path_flag else os.path.relpath(path)
+    name = path if flag_abs_path else os.path.relpath(path)
     # if extension not in file_extensions:
     #    raise ExtensionError(extension)
     file = open(path, 'r')
     print(path, extension)
-    try:
-        for line in file:
-            line_count += 1
-            char_count += len(line)
-    except UnicodeDecodeError:
-        return name, None
-    return name, FileData(extension, line_count, char_count)
+    return name, parse_file(file, extension)
 
 
 def do_the_thing(start_dir=os.path.dirname(os.path.abspath(__file__))):
