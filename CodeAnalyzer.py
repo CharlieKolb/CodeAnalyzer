@@ -24,7 +24,8 @@ DirData = namedtuple("DictData", "amount_of_files file_name_list dir_path_list")
 # LangData = namedtuple("LangData", "file_count line_count char_count")
 
 # ToDo: Generalize this for different languages?
-brace_only_options = [")", "(", "{", "}", ") {", "){"]
+brace_only_options = [")", "(", "{", "}", ") {", "){", "};", ");", "{}"]
+
 
 # ToDo: Generalize these two into the same, differentiated by name in dict
 class FileData:
