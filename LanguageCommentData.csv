@@ -1,4 +1,4 @@
-language, line_comment, block_comment_start, block_comment_end
+language,line_comment,block_comment_start,block_comment_end
 java,//,/*,*/
 scala,//,/*,*/
 kotlin,//,/*,*/
