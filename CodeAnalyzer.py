@@ -101,11 +101,8 @@ def parse_file(file):
                     in_block_comment = True
                 # this checks for start of comment blocks
                 # catches a "print(\/*)", but not a "/* print(\/*", which seems like a pretty rare edge case
-                elif "/*" in stripped and "\\/*" not in stripped:
-                    if "*/" in stripped:
-                        commented_out_count += 1
-                    else:
-                        in_block_comment = True
+                elif "/*" in stripped and "\\/*" not in stripped and ("*/" not in stripped or "*//*" in stripped):
+                    in_block_comment = True
             else:
                 commented_out_count += 1
                 if "*/" in line:
