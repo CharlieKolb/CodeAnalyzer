@@ -69,8 +69,19 @@ class LangData:
                 + " blank_count = {4:8}, brace_only_count = {5:8}]")\
             .format(self.file_count, self.line_count, self.char_count, self.commented_out_count, self.blank_count, self.brace_only_count)
 
+
+file_extensions = dict()
+
 # ToDo: Read this from csv
-file_extensions = ['.java', '.js', '.c', '.h', '.cpp', '.hpp', '.cs', '.py', '.php']
+if os.path.isfile("LanguageExtensionData.csv"):
+    with open("LanguageExtensionData.csv") as extData:
+        for line in extData:
+            ext, langs = tuple(line.split(','))
+            file_extensions[ext] = [x for x in langs.split()]
+else:
+    print("LanguageExtensionData.csv was not found in the same directory as this script!")
+    print("Falling back to standard version with python and java only!")
+    file_extensions = {"py": "python", "java": "java"}
 
 
 # ToDo handle different input parameters and call the fitting functions
@@ -78,8 +89,6 @@ def main():
     pass
 
 
-# ToDo:
-#   - Distribution of line length?
 def parse_file(file):
     line_count, char_count, commented_out_count, blank_count, brace_only_count = 0, 0, 0, 0, 0
     in_block_comment = False
@@ -136,9 +145,8 @@ def analyze_file(path):
     name = path if flag_abs_path else os.path.relpath(path)
     # if extension not in file_extensions:
     #    raise ExtensionError(extension)
-    file = open(path, 'r')
-    # print(path, extension)
-    return name, extension, parse_file(file)
+
+    return name, extension[1:], parse_file(open(path, 'r'))
 
 
 def do_the_thing(start_dir=os.path.dirname(os.path.abspath(__file__))):
@@ -168,5 +176,6 @@ def do_the_thing(start_dir=os.path.dirname(os.path.abspath(__file__))):
                         ext_dict[file_extension] += file_data
     for k, v in ext_dict.items():
         print("{:<8}:  {}".format(k, v))
+
 
 do_the_thing()
