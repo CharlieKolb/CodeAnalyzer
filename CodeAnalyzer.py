@@ -15,15 +15,60 @@ ToDo Program:
     Optimization: Only do extensive counting if file is in extension list
 '''
 
+# flags
 flag_abs_path = False
 flag_count_unknown_extensions = False
 
-
+# types
 DirData = namedtuple("DirData", "amount_of_files file_name_list dir_path_list")
 
-# ToDo: Generalize this for different languages?
+# fallback options
+fallback_file_extensions = {"py": "python", "java": "java"}
+fallback_comment_dict = {"python": ("#", "'''", "'''"), "java": ("//", "/*", "*/")}
+
+# globals
+file_extensions = dict()
+comment_options = dict()
 brace_only_options = [")", "(", "{", "}", ") {", "){", "};", ");", "{}"]
 
+# initializations
+
+
+def init_ext_data():
+    ext_dict = dict()
+    if os.path.isfile("LanguageExtensionData.csv"):
+        with open("LanguageExtensionData.csv") as extData:
+            for line in extData:
+                line.strip()
+                ext, langs = tuple(line.split(','))
+                ext_dict[ext] = [x for x in langs.split()]
+    else:
+        print("LanguageExtensionData.csv was not found in the same directory as this script!")
+        print("Falling back to version specified in CodeAnalyzer.py!")
+        ext_dict = fallback_file_extensions
+    return ext_dict
+
+
+def init_comment_data():
+    comment_dict = dict()
+    if os.path.isfile("LanguageCommentData.csv"):
+        with open("LanguageCommentData.csv") as extData:
+            for line in extData:
+                line.strip()
+                ext, single, block_start, block_end = line.split(',')
+                # todo there is probably a better way to transform three strings with whitespaces into three lists!
+                comment_dict[ext] = ([x for x in single.split()], [x for x in block_start.split()], [x for x in block_end.split()])
+    else:
+        print("LanguageCommentData.csv was not found in the same directory as this script!")
+        print("Falling back to version specified in CodeAnalyzer.py!")
+        comment_dict = fallback_comment_dict
+    return comment_dict
+
+# temporary
+file_extensions = init_ext_data()
+comment_options = init_comment_data()
+
+# data structures
 
 class LineData:
     def __init__(self, total_line_count=0, commented_out_count=0, blank_count=0, brace_only_count=0, char_count=0):
@@ -70,25 +115,7 @@ class LangData:
             .format(self.file_count, self.line_count, self.char_count, self.commented_out_count, self.blank_count, self.brace_only_count)
 
 
-file_extensions = dict()
-
-# ToDo: Read this from csv
-if os.path.isfile("LanguageExtensionData.csv"):
-    with open("LanguageExtensionData.csv") as extData:
-        for line in extData:
-            ext, langs = tuple(line.split(','))
-            file_extensions[ext] = [x for x in langs.split()]
-else:
-    print("LanguageExtensionData.csv was not found in the same directory as this script!")
-    print("Falling back to standard version with python and java only!")
-    file_extensions = {"py": "python", "java": "java"}
-
-
-# ToDo handle different input parameters and call the fitting functions
-def main():
-    pass
-
-
+# todo use dynamic comment types
 def parse_file(file):
     line_count, char_count, commented_out_count, blank_count, brace_only_count = 0, 0, 0, 0, 0
     in_block_comment = False
@@ -164,6 +191,8 @@ def do_the_thing(start_dir=os.path.dirname(os.path.abspath(__file__))):
         dir_dict[curr_dir] = analyze_dir(curr_dir)
         for dir_name in dir_dict[curr_dir].dir_path_list:
             dir_deque.append(dir_name)
+
+    # iterate through all discovered files and add to result count
     for curr_dir, dir_data in dir_dict.items():
         for file_name in dir_data.file_name_list:
             file_name, file_extension, file_data = analyze_file(curr_dir + os.path.sep + file_name)
@@ -179,3 +208,10 @@ def do_the_thing(start_dir=os.path.dirname(os.path.abspath(__file__))):
 
 
 do_the_thing()
+
+
+# ToDo handle different input parameters and call the fitting functions
+def main():
+    pass
+
+

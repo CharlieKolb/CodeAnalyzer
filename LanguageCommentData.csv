@@ -30,4 +30,3 @@ object_pascal,//,{ (*, } *)
 x86assembly,;,,
 common_lisp,;,#|,|#
 clojure,;,(comment,)
-
