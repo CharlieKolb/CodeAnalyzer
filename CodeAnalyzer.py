@@ -40,6 +40,8 @@ def init_ext_data():
         with open("LanguageExtensionData.csv") as extData:
             for line in extData:
                 line.strip()
+                if len(line.split(',')) != 2:
+                    print("parsed line with wrong amount of ',' in LanguageExtensionData!")
                 ext, langs = tuple(line.split(','))
                 ext_dict[ext] = [x for x in langs.split()]
     else:
@@ -55,6 +57,8 @@ def init_comment_data():
         with open("LanguageCommentData.csv") as extData:
             for line in extData:
                 line.strip()
+                if len(line.split(',')) != 4:
+                    print("parsed line with wrong amount of ',' in LanguageCommentData!")
                 ext, single, block_start, block_end = line.split(',')
                 # todo there is probably a better way to transform three strings with whitespaces into three lists!
                 comment_dict[ext] = ([x for x in single.split()], [x for x in block_start.split()], [x for x in block_end.split()])
