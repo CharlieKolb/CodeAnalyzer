@@ -29,6 +29,7 @@ pl6,perl
 pm,perl
 ph,perl
 R,r
+r,r
 rb,ruby
 rbw,ruby
 julia,jl
@@ -44,7 +45,7 @@ fsm,f#
 sql,sql
 vb,visual_basic
 vbnet,visual_basic
-.pas,object_pascal
-.asm,x86assembly
+pas,object_pascal
+asm,x86assembly
 lisp,common_lisp
 clj,clojure
